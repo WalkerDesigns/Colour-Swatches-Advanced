@@ -1,0 +1,18 @@
+{
+  "name": "multisite-colour-swatches-tests",
+  "private": true,
+  "scripts": {
+    "test": "playwright test",
+    "test:frameworks": "node tests/frameworks/compile.js"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.56.1",
+    "@tailwindcss/postcss": "^4.3.4",
+    "bootstrap": "~5.3.8",
+    "jquery": "^3.7.1",
+    "postcss": "^8.5.32",
+    "sass": "^1.107.1",
+    "tailwindcss": "^4.3.4",
+    "tailwindcss3": "npm:tailwindcss@^3.4.19"
+  }
+}

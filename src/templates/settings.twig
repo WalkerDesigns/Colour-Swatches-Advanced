@@ -1,0 +1,95 @@
+{% import '_includes/forms' as forms %}
+
+<p>{{ 'Colours are resolved using the site of the element being edited. Selections are always translated per site.'|t('multisite-colour-swatches') }}</p>
+
+{{ forms.lightswitchField({
+    label: 'Use PHP configuration'|t('multisite-colour-swatches'),
+    instructions: 'Define global and site-specific palettes in config/multisite-colour-swatches.php.'|t('multisite-colour-swatches'),
+    name: 'useConfigFile',
+    on: field.useConfigFile,
+    toggle: 'palette-settings',
+    reverseToggle: 'local-options',
+}) }}
+
+<div id="palette-settings" class="{{ field.useConfigFile ? '' : 'hidden' }}">
+    {{ forms.selectField({
+        label: 'Palette'|t('multisite-colour-swatches'),
+        instructions: 'Choose a palette name. Each site can provide its own colours for that same name.'|t('multisite-colour-swatches'),
+        name: 'palette',
+        value: field.palette,
+        options: palettes,
+        errors: field.getErrors('palette'),
+    }) }}
+</div>
+
+<div id="local-options" class="{{ field.useConfigFile ? 'hidden' : '' }}">
+    {{ forms.editableTableField({
+        label: 'Colours'|t('multisite-colour-swatches'),
+        instructions: 'Field-defined colours are the same on every site; selections remain independent.'|t('multisite-colour-swatches'),
+        name: 'options',
+        id: 'options',
+        cols: {
+            handle: {heading: 'Handle'|t('multisite-colour-swatches'), type: 'singleline'},
+            label: {heading: 'Label'|t('multisite-colour-swatches'), type: 'singleline'},
+            color: {heading: 'Hex colours (comma separated)'|t('multisite-colour-swatches'), type: 'singleline'},
+            class: {heading: 'CSS class'|t('multisite-colour-swatches'), type: 'singleline'},
+            default: {heading: 'Default?'|t('multisite-colour-swatches'), type: 'checkbox'},
+        },
+        rows: field.options,
+        allowAdd: true,
+        allowDelete: true,
+        allowReorder: true,
+        errors: field.getErrors('options'),
+    }) }}
+</div>
+
+{{ forms.lightswitchField({
+    label: 'Set random on save'|t('multisite-colour-swatches'),
+    instructions: 'When no colour or default is selected, choose a random colour from this site palette on save.'|t('multisite-colour-swatches'),
+    name: 'setRandom',
+    on: field.setRandom,
+}) }}
+
+<hr>
+
+<p>{{ 'Editors can refine the selected colour with a shade and opacity from the CSS framework chosen for the site in the plugin settings.'|t('multisite-colour-swatches') }}</p>
+
+{{ forms.lightswitchField({
+    label: 'Allow shades'|t('multisite-colour-swatches'),
+    instructions: 'Show a shade dropdown, such as 100–900 for Tailwind or subtle/emphasis for Bootstrap.'|t('multisite-colour-swatches'),
+    name: 'allowShades',
+    on: field.allowShades,
+    toggle: 'shade-limits',
+}) }}
+
+<div id="shade-limits" class="{{ field.allowShades ? '' : 'hidden' }}">
+    {{ forms.textField({
+        label: 'Available shades'|t('multisite-colour-swatches'),
+        instructions: 'Comma-separated shades editors can choose. Leave blank to allow every shade of the site’s framework.'|t('multisite-colour-swatches'),
+        tip: shadeHints ? 'Available shades by framework — {list}'|t('multisite-colour-swatches', {list: shadeHints|join('; ')}) : null,
+        name: 'shades',
+        value: field.shades|join(', '),
+        placeholder: 'All shades'|t('multisite-colour-swatches'),
+        errors: field.getErrors('shades'),
+    }) }}
+</div>
+
+{{ forms.lightswitchField({
+    label: 'Allow opacity'|t('multisite-colour-swatches'),
+    instructions: 'Show an opacity dropdown that applies the framework’s opacity utilities.'|t('multisite-colour-swatches'),
+    name: 'allowOpacity',
+    on: field.allowOpacity,
+    toggle: 'opacity-limits',
+}) }}
+
+<div id="opacity-limits" class="{{ field.allowOpacity ? '' : 'hidden' }}">
+    {{ forms.textField({
+        label: 'Available opacities'|t('multisite-colour-swatches'),
+        instructions: 'Comma-separated whole-number percentages editors can choose. Leave blank to allow every opacity of the site’s framework.'|t('multisite-colour-swatches'),
+        tip: opacityHints ? 'Available opacities by framework — {list}'|t('multisite-colour-swatches', {list: opacityHints|join('; ')}) : null,
+        name: 'opacities',
+        value: field.opacities|join(', '),
+        placeholder: 'All opacities'|t('multisite-colour-swatches'),
+        errors: field.getErrors('opacities'),
+    }) }}
+</div>

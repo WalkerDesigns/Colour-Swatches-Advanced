@@ -1,0 +1,13 @@
+/vendor/
+/node_modules/
+/composer.lock
+/test-results/
+/playwright-report/
+/tests/browser/fixture.html
+/tests/frameworks/generated/
+/.env
+/.env.*
+/.idea/
+/.vscode/
+.DS_Store
+Thumbs.db

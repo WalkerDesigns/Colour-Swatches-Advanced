@@ -1,0 +1,180 @@
+{% import '_includes/forms' as forms %}
+
+{% set configWarning = 'This is set in config/multisite-colour-swatches.php.'|t('multisite-colour-swatches') %}
+
+<h2>{{ 'CSS framework'|t('multisite-colour-swatches') }}</h2>
+<p>{{ 'Choose the CSS framework your templates use. Swatch classes such as {example} follow its naming and only use classes a standard build of that framework already contains, so no build step is needed.'|t('multisite-colour-swatches', {example: '<code>entry.colour.bg</code>'})|raw }}</p>
+<ul class="bullets">
+    <li>{{ 'Bootstrap 5.3: opacity uses the bg-opacity-* classes from your existing CSS. Bootstrap has no shade classes for theme colours, so editors see no shade choice unless you add shades your build provides.'|t('multisite-colour-swatches') }}</li>
+    <li>{{ 'Tailwind CSS 3 and 4: Tailwind removes classes it does not find in your templates. Use {attrs} or {style} to add matching inline colours, so shades and opacity always render.'|t('multisite-colour-swatches', {attrs: '<code>entry.colour.attrs(\'bg\')</code>', style: '<code>entry.colour.style(\'bg\')</code>'})|raw }}</li>
+    <li>{{ 'Plugin CSS: the plugin adds the CSS for each class to the page automatically.'|t('multisite-colour-swatches') }}</li>
+</ul>
+
+{{ forms.selectField({
+    label: 'Framework'|t('multisite-colour-swatches'),
+    instructions: 'Used by every site unless the site is overridden below.'|t('multisite-colour-swatches'),
+    id: 'framework',
+    name: 'framework',
+    options: frameworks,
+    value: settings.framework,
+    disabled: settings.isOverriddenByConfig('framework'),
+    warning: settings.isOverriddenByConfig('framework') ? configWarning,
+    errors: settings.getErrors('framework'),
+}) }}
+
+{% if sites|length > 1 %}
+    {% set siteTable %}
+        <table class="data fullwidth">
+            <tbody>
+                {% for site in sites %}
+                    <tr>
+                        <th scope="row"><label for="site-framework-{{ site.handle }}">{{ site.name|t('site') }}</label></th>
+                        <td>
+                            {{ forms.select({
+                                id: 'site-framework-' ~ site.handle,
+                                name: 'siteFrameworks[' ~ site.handle ~ ']',
+                                options: [{label: 'Use the framework above'|t('multisite-colour-swatches'), value: ''}]|merge(frameworks),
+                                value: settings.siteFrameworks[site.handle] ?? '',
+                                disabled: settings.isOverriddenByConfig('siteFrameworks'),
+                            }) }}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endset %}
+    {{ forms.field({
+        label: 'Site frameworks'|t('multisite-colour-swatches'),
+        instructions: 'Give a site its own framework, for example when each site has a separate front-end build.'|t('multisite-colour-swatches'),
+        id: 'site-frameworks',
+        warning: settings.isOverriddenByConfig('siteFrameworks') ? configWarning,
+        errors: settings.getErrors('siteFrameworks'),
+    }, siteTable) }}
+{% endif %}
+
+<hr>
+
+<h2>{{ 'Shades and opacities'|t('multisite-colour-swatches') }}</h2>
+<p>{{ 'Each framework starts with the values its standard CSS already contains. Only add values your front-end build provides, for example extra Bootstrap opacity utilities. Field settings can limit what editors see.'|t('multisite-colour-swatches') }}</p>
+
+{% for scale in scales %}
+    <h3>{{ scale.label }}</h3>
+    <div class="flex flex-nowrap" style="align-items: flex-start; gap: 24px">
+        <div class="flex-grow">
+            {{ forms.textField({
+                label: 'Additional shades'|t('multisite-colour-swatches'),
+                instructions: 'Defaults: {list}'|t('multisite-colour-swatches', {list: scale.defaultShades ?: 'none'|t('multisite-colour-swatches')}),
+                id: 'custom-shades-' ~ scale.framework,
+                name: 'customShades[' ~ scale.framework ~ ']',
+                value: scale.customShades,
+                placeholder: scale.framework == 'bootstrap5' ? 'e.g. 100, 200, 300' : 'e.g. 25, 975',
+                disabled: settings.isOverriddenByConfig('customShades'),
+                warning: settings.isOverriddenByConfig('customShades') ? configWarning,
+            }) }}
+        </div>
+        <div class="flex-grow">
+            {{ forms.textField({
+                label: 'Additional opacities'|t('multisite-colour-swatches'),
+                instructions: 'Defaults: {list}'|t('multisite-colour-swatches', {list: scale.defaultOpacities}),
+                id: 'custom-opacities-' ~ scale.framework,
+                name: 'customOpacities[' ~ scale.framework ~ ']',
+                value: scale.customOpacities,
+                placeholder: scale.framework == 'bootstrap5' ? 'e.g. 5, 15, 90' : 'e.g. 33, 66',
+                disabled: settings.isOverriddenByConfig('customOpacities'),
+                warning: settings.isOverriddenByConfig('customOpacities') ? configWarning,
+            }) }}
+        </div>
+    </div>
+{% endfor %}
+{% set scaleErrors = settings.getErrors('customShades')|merge(settings.getErrors('customOpacities')) %}
+{% if scaleErrors %}
+    <ul class="errors">
+        {% for error in scaleErrors %}
+            <li>{{ error }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}
+
+<hr>
+
+{{ forms.lightswitchField({
+    label: 'Register plugin CSS automatically'|t('multisite-colour-swatches'),
+    instructions: 'For sites using “Plugin CSS”, add the CSS for each class a template outputs to the front-end page. Turn this off if you include plugin.css yourself.'|t('multisite-colour-swatches'),
+    id: 'register-css',
+    name: 'registerCss',
+    on: settings.registerCss,
+    disabled: settings.isOverriddenByConfig('registerCss'),
+    warning: settings.isOverriddenByConfig('registerCss') ? configWarning,
+}) }}
+
+<details id="advanced-generation"{% if settings.getErrors('safelistUtilities') or settings.getErrors('outputPath') %} open{% endif %}>
+<summary><strong>{{ 'Optional: generate stylesheet files'|t('multisite-colour-swatches') }}</strong></summary>
+<p>{{ 'Not needed for normal use. Generate files only if you want framework classes for every shade and opacity, for example Bootstrap shade classes or a Tailwind safelist, and can add them to your front-end build.'|t('multisite-colour-swatches') }}</p>
+
+{{ forms.checkboxSelectField({
+    label: 'Utilities'|t('multisite-colour-swatches'),
+    instructions: 'Classes to generate for Tailwind safelists, Bootstrap utilities and plugin CSS. Fewer utilities make smaller CSS files.'|t('multisite-colour-swatches'),
+    id: 'safelist-utilities',
+    name: 'safelistUtilities',
+    options: utilities,
+    values: settings.safelistUtilities,
+    disabled: settings.isOverriddenByConfig('safelistUtilities'),
+    warning: settings.isOverriddenByConfig('safelistUtilities') ? configWarning,
+    errors: settings.getErrors('safelistUtilities'),
+}) }}
+
+{{ forms.textField({
+    label: 'Output path'|t('multisite-colour-swatches'),
+    instructions: 'Where {command} writes the generated files. Aliases such as @root are supported.'|t('multisite-colour-swatches', {command: '`php craft multisite-colour-swatches/generate`'}),
+    id: 'output-path',
+    name: 'outputPath',
+    value: settings.outputPath,
+    disabled: settings.isOverriddenByConfig('outputPath'),
+    warning: settings.isOverriddenByConfig('outputPath') ? configWarning,
+    errors: settings.getErrors('outputPath'),
+}) }}
+
+{% set usage = {
+    tailwind3: 'Add {code} to tailwind.config.js. If your config has its own safelist, also add {safelist} to it.'|t('multisite-colour-swatches', {
+        code: '<code>presets: [require(\'./multisite-colour-swatches/tailwind3.cjs\')]</code>',
+        safelist: '<code>...require(\'./multisite-colour-swatches/tailwind3.cjs\').safelist</code>',
+    }),
+    tailwind4: 'Import it after Tailwind in your main CSS file: {code}'|t('multisite-colour-swatches', {
+        code: '<code>@import "tailwindcss"; @import "../multisite-colour-swatches/tailwind4.css";</code>',
+    }),
+    bootstrap5: 'Import it after {after} and before {before}, or before a single {single}.'|t('multisite-colour-swatches', {
+        after: '<code>bootstrap/scss/utilities</code>',
+        before: '<code>bootstrap/scss/utilities/api</code>',
+        single: '<code>@import "bootstrap/scss/bootstrap"</code>',
+    }),
+    plugin: 'Classes are added to front-end pages automatically while “Register plugin CSS automatically” is on. Otherwise, link plugin.css.'|t('multisite-colour-swatches'),
+} %}
+
+<div class="field" id="generated-files">
+    <div class="heading"><label>{{ 'Framework files'|t('multisite-colour-swatches') }}</label></div>
+    <div class="instructions"><p>{{ 'Run {command} to write these files, then rebuild your front-end assets. Previews reflect the saved settings.'|t('multisite-colour-swatches', {command: '<code>php craft multisite-colour-swatches/generate</code>'})|raw }}</p></div>
+    {% if generatorError %}
+        <p class="error">{{ generatorError }}</p>
+    {% elseif generated %}
+        {% for warning in generated.warnings %}
+            <p class="warning with-icon">{{ warning }}</p>
+        {% endfor %}
+        {% for framework, file in files %}
+            {% if generated.files[file] is defined %}
+                <details class="mcs-generated" style="margin-top: 12px">
+                    <summary>
+                        <strong>{{ file }}</strong> · {{ frameworkLabels[framework] }} ·
+                        {{ '{count, plural, =1{# class} other{# classes}}'|t('multisite-colour-swatches', {count: generated.counts[framework]}) }}
+                    </summary>
+                    <p>{{ usage[framework]|raw }}</p>
+                    <textarea class="text fullwidth code" rows="14" readonly aria-label="{{ file }}">{{ generated.files[file] }}</textarea>
+                </details>
+            {% endif %}
+        {% endfor %}
+
+        {% if not generated.files %}
+            <p class="light">{{ 'Add a Multisite Colour Swatches field to see the generated files.'|t('multisite-colour-swatches') }}</p>
+        {% endif %}
+    {% endif %}
+</div>
+</details>

@@ -1,0 +1,47 @@
+{
+    "name": "walker-designs/craft-multisite-colour-swatches",
+    "description": "Site-aware colour palettes for Craft CMS.",
+    "keywords": ["craft", "craftcms", "multisite", "colour", "color", "swatches", "hyper"],
+    "type": "craft-plugin",
+    "version": "1.0.0",
+    "license": "MIT",
+    "authors": [
+        {"name": "Walker Designs", "homepage": "https://walkerdesigns.com.au"},
+        {"name": "Percipio Global Ltd."},
+        {"name": "Craft Pulse"}
+    ],
+    "require": {
+        "php": "^8.2",
+        "craftcms/cms": "^5.0.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "walkerdesigns\\multisitecolourswatches\\": "src/"
+        }
+    },
+    "extra": {
+        "handle": "multisite-colour-swatches",
+        "name": "Multisite Colour Swatches",
+        "developer": "Walker Designs",
+        "developerUrl": "https://walkerdesigns.com.au",
+        "class": "walkerdesigns\\multisitecolourswatches\\MultisiteColourSwatches"
+    },
+    "scripts": {
+        "test": "@php tests/run.php"
+    },
+    "config": {
+        "allow-plugins": {
+            "craftcms/plugin-installer": true,
+            "yiisoft/yii2-composer": true
+        },
+        "sort-packages": true
+    },
+    "archive": {
+        "exclude": [
+            "/.github", "/tests", "/node_modules", "/vendor",
+            "/test-results", "/playwright-report",
+            "/package.json", "/package-lock.json", "/playwright.config.js",
+            "/composer.lock", "/.env", "/.env.*", "/.idea", "/.vscode"
+        ]
+    }
+}

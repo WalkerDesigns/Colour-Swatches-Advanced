@@ -1,0 +1,64 @@
+{% import '_includes/forms' as forms %}
+
+{% macro modifierSelect(id, attribute, label, emptyLabel, options, disabled) %}
+    <div class="wd-colour-swatches__modifier">
+        <label for="{{ id }}">{{ label }}</label>
+        <div class="select small">
+            <select id="{{ id }}" {{ attribute }}{{ disabled ? ' disabled' }}>
+                <option value="">{{ emptyLabel }}</option>
+                {% for option in options %}
+                    <option value="{{ option.value }}"
+                            {{- option.selected ? ' selected' }}
+                            {{- option.disabled ? ' disabled' }}
+                            {{- option.unavailable ? ' data-unavailable-option' }}
+                            {{- option.extra ? ' data-extra-option' }}>{{ option.label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+{% endmacro %}
+
+<div id="{{ id }}" class="wd-colour-swatches">
+    {% if not options|length %}
+        <p class="warning">{{ 'No colours are configured for this palette and site. Check multisite-colour-swatches.php.'|t('multisite-colour-swatches') }}</p>
+    {% endif %}
+    {% if unavailable %}
+        <p class="warning" data-unavailable>{{ 'The saved colour "{label}" is no longer available for this site. Select another colour or clear it before saving.'|t('multisite-colour-swatches', {label: value.label}) }}</p>
+    {% endif %}
+    <div class="swatch-options">
+        {% for swatch in swatches %}
+            {% set option = swatch.option %}
+            <button type="button" class="swatch"
+                    title="{{ option.label }}" aria-label="{{ option.label }}"
+                    aria-pressed="{{ hasSelection and value.handle == option.handle ? 'true' : 'false' }}"
+                    data-swatch="{{ option.toArray()|json_encode }}"
+                    data-shades="{{ swatch.shades }}"
+                    data-color="{{ option.cssBackground }}"
+                    style="background: {{ option.cssBackground }}"></button>
+        {% endfor %}
+    </div>
+    {% if shadeOptions or opacityOptions %}
+        <div class="wd-colour-swatches__modifiers">
+            {% if shadeOptions %}
+                {{ _self.modifierSelect(id ~ '-shade', 'data-shade', 'Shade'|t('multisite-colour-swatches'), 'Base colour'|t('multisite-colour-swatches'), shadeOptions, not hasSelection) }}
+            {% endif %}
+            {% if opacityOptions %}
+                {{ _self.modifierSelect(id ~ '-opacity', 'data-opacity', 'Opacity'|t('multisite-colour-swatches'), 'Solid'|t('multisite-colour-swatches'), opacityOptions, not hasSelection) }}
+            {% endif %}
+            <span class="wd-colour-swatches__preview" data-preview aria-hidden="true">
+                <span style="background: {{ previewColor }}; opacity: {{ previewOpacity }}"></span>
+            </span>
+        </div>
+    {% endif %}
+    {% if unavailableShade %}
+        <p class="warning" data-unavailable-modifier="shade">{{ 'The saved shade "{shade}" is not available for this colour on this site. Choose another shade before saving.'|t('multisite-colour-swatches', {shade: value.shade}) }}</p>
+    {% endif %}
+    {% if unavailableOpacity %}
+        <p class="warning" data-unavailable-modifier="opacity">{{ 'The saved opacity {opacity}% is not available on this site. Choose another opacity before saving.'|t('multisite-colour-swatches', {opacity: value.opacity}) }}</p>
+    {% endif %}
+    <button type="button" class="btn small" data-clear>{{ 'Clear selection'|t('multisite-colour-swatches') }}</button>
+    {{ forms.hidden({
+        name: name,
+        value: value ? value.toArray()|json_encode : '',
+    }) }}
+</div>

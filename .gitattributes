@@ -1,0 +1,13 @@
+* text=auto
+*.php text eol=lf
+*.js text eol=lf
+*.json text eol=lf
+*.twig text eol=lf
+*.yml text eol=lf
+/.github export-ignore
+/tests export-ignore
+/package.json export-ignore
+/package-lock.json export-ignore
+/playwright.config.js export-ignore
+/.gitignore export-ignore
+/.gitattributes export-ignore

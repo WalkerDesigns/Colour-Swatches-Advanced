@@ -1,0 +1,52 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  php:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.2', '8.5']
+        hyper: ['none', '2', '3']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: bcmath, curl, dom, fileinfo, gd, intl, mbstring, openssl, pdo_mysql, zip
+          coverage: none
+          tools: composer:v2
+      - run: composer validate --no-check-lock
+      - if: matrix.hyper != 'none'
+        run: composer require --dev --no-update "verbb/hyper:^${{ matrix.hyper }}.0"
+      - run: composer update --prefer-dist --no-interaction --no-plugins --no-scripts
+      - name: PHP syntax
+        run: find src tests -name '*.php' -print0 | xargs -0 -n1 php -l && php -l config.php
+      - name: PHP regressions
+        run: composer test
+        env:
+          SWATCH_EXPECT_HYPER: ${{ matrix.hyper }}
+          SWATCH_BROWSER_FIXTURE: tests/browser/fixture.html
+          SWATCH_FRAMEWORK_FIXTURES: tests/frameworks/generated
+      - uses: actions/setup-node@v4
+        if: matrix.php == '8.2' && matrix.hyper == '3'
+        with:
+          node-version: '22'
+          cache: npm
+      - if: matrix.php == '8.2' && matrix.hyper == '3'
+        run: npm ci --ignore-scripts
+      - if: matrix.php == '8.2' && matrix.hyper == '3'
+        run: npx playwright install --with-deps chromium
+      - name: Framework compile tests
+        if: matrix.php == '8.2' && matrix.hyper == '3'
+        run: npm run test:frameworks
+      - if: matrix.php == '8.2' && matrix.hyper == '3'
+        run: npm test
