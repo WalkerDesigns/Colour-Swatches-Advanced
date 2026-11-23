@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.0.0 - 2026-11-23
 
 ### Added
 - Standalone multisite colour field with per-site selections and PHP-configured palettes.
@@ -32,6 +32,3 @@
 - Swatches remain clickable when Hyper inserts or replaces field markup.
 - Repeated asset loading does not register duplicate click handlers.
 - Hyper 2's serialized JSON now receives normalized site colours, defaults and random selections.
-
-Before tagging the first release, replace `Unreleased` with
-`1.0.0 - YYYY-MM-DD`, using the actual release date.

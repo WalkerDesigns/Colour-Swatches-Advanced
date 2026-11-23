@@ -12,15 +12,13 @@ The original plugin, fields, configuration and saved content are not modified.
 
 ## Installation
 
-After publication to the Craft Plugin Store or Packagist, install from your
-Craft project directory:
+Once the 1.0.0 release tag has been pushed, install from your Craft project
+directory:
 
 ```shell
 composer require walker-designs/craft-multisite-colour-swatches
 php craft plugin/install multisite-colour-swatches
 ```
-
-This package is not published yet. Until then, use the local development setup below.
 
 ### Local development
 
