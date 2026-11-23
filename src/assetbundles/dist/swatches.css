@@ -6,12 +6,11 @@
 }
 
 .wd-colour-swatches .swatch {
-    width: 36px;
-    height: 36px;
-    border: 2px solid var(--gray-300, #cbd5e1);
+    width: 28px;
+    height: 28px;
+    border: 1px solid var(--gray-300, #cbd5e1);
     border-radius: 6px;
     cursor: pointer;
-    box-shadow: inset 0 0 0 2px #fff;
 }
 
 .wd-colour-swatches .swatch[aria-pressed="true"] {

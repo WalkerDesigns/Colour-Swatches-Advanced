@@ -316,6 +316,14 @@ $legacy = ['label' => 'Primary', 'color' => [['color' => '#ffffff']]];
 same('primary', $field->normalizeValue($legacy, $omeo)->handle, 'Legacy arrays resolve by label');
 same('#4a665a', $field->normalizeValue(Json::encode($legacy), $omeo)->color[0]['color'], 'Legacy JSON is supported');
 same('#4a665a', $field->normalizeValue(Json::encode(Json::encode($legacy)), $omeo)->color[0]['color'], 'Double-encoded module values are supported');
+$handleOnly = ['handle' => 'primary', 'color' => [['color' => '#ffffff']]];
+same('Primary', $field->normalizeValue($handleOnly, $default)->label, 'Saved selections without labels resolve through their configured handle');
+$unlabelled = $field->normalizeValue(['color' => [['color' => '#ffffff']]], $default);
+same(true, $field->inputVariables($unlabelled, $default, 'unlabelled', 'brandColour')['unavailable'], 'Handle-less saved selections remain visible as unavailable instead of preventing the editor from rendering');
+$invalidLabel = $field->normalizeValue(['label' => ['invalid'], 'color' => [['color' => '#ffffff']]], $default);
+same(true, $field->inputVariables($invalidLabel, $default, 'invalid-label', 'brandColour')['unavailable'], 'Malformed saved labels remain repairable without relaxing palette validation');
+same(null, Swatch::fromValue(['label' => '', 'handle' => '', 'color' => []]), 'An empty serialized swatch selection normalizes to no selection');
+same(null, Swatch::fromValue(['color' => false]), 'Falsey color payloads without a swatch identity normalize to no selection');
 $collision = $fixture;
 $collision['*']['palettes']['brand'] = [
     ['handle' => 'primary', 'label' => 'Different', 'color' => '#000000'],

@@ -53,8 +53,25 @@ class Swatch extends Model
         if (!is_array($value)) {
             throw new InvalidConfigException('A colour selection must be a swatch object.');
         }
+        $label = $value['label'] ?? null;
+        $handle = $value['handle'] ?? null;
+        $color = $value['color'] ?? $value['colour'] ?? null;
+        $hasIdentity = (is_string($label) && trim($label) !== '')
+            || (is_string($handle) && trim($handle) !== '');
+        $hasColor = (is_array($color) && $color !== [])
+            || (is_string($color) && trim($color) !== '');
+        if (!$hasIdentity && !$hasColor) {
+            return null;
+        }
         // Token, shade map and theme flags are trusted only from the palette configuration.
-        $swatch = self::fromArray(array_diff_key($value, ['token' => true, 'shades' => true, 'theme' => true]));
+        $data = array_diff_key($value, ['token' => true, 'shades' => true, 'theme' => true]);
+        if (!is_string($data['label'] ?? null) || trim($data['label']) === '') {
+            // Handle-less legacy selections stay visible as unavailable so editors can replace or clear them.
+            $data['label'] = is_string($data['handle'] ?? null) && trim($data['handle']) !== ''
+                ? $data['handle']
+                : 'Unlabelled colour';
+        }
+        $swatch = self::fromArray($data);
         if (($value['handle'] ?? '') === '') {
             $swatch->handle = '';
         }
